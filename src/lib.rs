@@ -131,6 +131,10 @@
 //! # */
 //! ```
 //!
+//! # More examples
+//!
+//! More examples are available in the documentation of [`tokio_select!`].
+//!
 //! # Global import
 //!
 //! You can make the `tokio_select!` macro globally available in your crate, without needing to import it, with:

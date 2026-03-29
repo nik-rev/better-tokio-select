@@ -18,7 +18,7 @@ cargo-reedme: info-end -->
 [![crates.io](https://img.shields.io/crates/v/better_tokio_select?style=flat-square&logo=rust)](https://crates.io/crates/better_tokio_select)
 [![docs.rs](https://img.shields.io/docsrs/better_tokio_select?style=flat-square&logo=docs.rs)](https://docs.rs/better_tokio_select)
 ![license](https://img.shields.io/badge/license-Apache--2.0_OR_MIT-blue?style=flat-square)
-![msrv](https://img.shields.io/badge/msrv-1.64-blue?style=flat-square&logo=rust)
+![msrv](https://img.shields.io/badge/msrv-1.71-blue?style=flat-square&logo=rust)
 [![github](https://img.shields.io/github/stars/nik-rev/better-tokio-select)](https://github.com/nik-rev/better-tokio-select)
 
 This crate exports the macro [`tokio_select!`](https://docs.rs/better_tokio_select/latest/better_tokio_select/macro.tokio_select.html), which, unlike [`tokio::select!`](https://docs.rs/tokio/latest/tokio/macro.select.html), can be formatted by `rustfmt`!
@@ -135,6 +135,10 @@ tokio_select!(biased, match .. {
     }
 })
 ```
+
+## More examples
+
+More examples are available in the documentation of [`tokio_select!`](https://docs.rs/better_tokio_select/latest/better_tokio_select/macro.tokio_select.html).
 
 ## Global import
 
