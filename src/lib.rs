@@ -25,7 +25,9 @@
 //! ```
 //! # /*
 //! tokio::select! {
-//!     Ok(res) = reader.read(&mut buf), if can_read => writer.write_all(res.bytes)
+//!     Ok(res) = reader.read(&mut buf), if can_read => {
+//!         writer.write_all(res.bytes)
+//!     }
 //! }
 //! # */
 //! ```
@@ -41,7 +43,9 @@
 //! ```
 //! # /*
 //! match () {
-//!     Ok(res) | on!(reader.read(&mut buf)) if can_read => writer.write_all(res.bytes)
+//!     Ok(res) | on!(reader.read(&mut buf)) if can_read => {
+//!         writer.write_all(res.bytes)
+//!     }
 //! }
 //! # */
 //! ```
@@ -75,6 +79,7 @@
 //! #[tokio_select]
 //! match () {
 //!     Ok(n) | on!(reader.read(&mut buf)) if can_read => {
+//!         let n = res?;
 //!         if n == 0 { return Ok(()); }
 //!         writer.write_all(&buf[..n]).await?;
 //!     }
