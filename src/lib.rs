@@ -42,6 +42,7 @@
 //!
 //! ```
 //! # /*
+//! #[tokio_select]
 //! match () {
 //!     Ok(res) | on!(reader.read(&mut buf)) if can_read => {
 //!         writer.write_all(res.bytes)
