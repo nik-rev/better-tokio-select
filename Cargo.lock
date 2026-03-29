@@ -4,7 +4,7 @@ version = 4
 
 [[package]]
 name = "better_tokio_select"
-version = "0.1.4"
+version = "0.1.5"
 dependencies = [
  "futures",
  "proc-macro2",
