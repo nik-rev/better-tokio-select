@@ -2,6 +2,7 @@
 name = "better_tokio_select"
 description = "tokio::select! that can be formatted by rustfmt"
 version = "0.1.6"
+rust-version = "1.64"
 authors = ["Nik Revenco <pm@nikrev.com>"]
 edition = "2021"
 repository = "https://github.com/nik-rev/better-tokio-select"

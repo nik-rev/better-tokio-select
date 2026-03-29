@@ -1,5 +1,5 @@
 //! These tests are adapted from the `tokio` project's `macro_select.rs` file, which tests
-//! `tokio::select!` macro. Every invocation of `tokio::select!` was replaced with `#[tokio_select]`.
+//! `tokio::select!` macro. Every invocation of `tokio::select!` was replaced with `tokio_select!`.
 //!
 //! https://github.com/tokio-rs/tokio/blob/ee4de818065a97c0be0d6bfc18fb36725349aef8/tokio/tests/macros_select.rs
 //!
