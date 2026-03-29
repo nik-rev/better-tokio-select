@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 [Unreleased]: https://github.com/nik-rev/better-tokio-select/compare/v0.1.1...HEAD
 
+- Documentation improvements
+
 ## [v0.1.1] - 2026-03-29
 
 [v0.1.1]: https://github.com/nik-rev/better-tokio-select/compare/v0.1.0...v0.1.1

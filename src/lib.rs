@@ -208,6 +208,25 @@ use syn::ExprMatch;
 use syn::MacroDelimiter;
 use syn::Pat;
 
+/// Like `tokio::select!`, but formattable by `rustfmt`.
+///
+/// ```
+/// # /*
+/// #[tokio_select(biased)]
+/// match () {
+///     Some(Message::Data { id, payload }) | on!(rx.recv()) => {
+///         process(id, payload).await;
+///     }
+///
+///     _ => {
+///         println!("no messages pending");
+///         tokio::time::sleep(Duration::from_millis(50)).await;
+///     }
+/// }
+/// # */
+/// ```
+///
+/// See the [crate-level](crate) documentation for more info.
 #[proc_macro_attribute]
 pub fn tokio_select(args: TokenStream, input: TokenStream) -> TokenStream {
     let biased_kw = parse_macro_input!(args as Option<kw::biased>).into_iter();
