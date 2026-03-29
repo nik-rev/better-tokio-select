@@ -1,20 +1,17 @@
-error: macro expansion ignores `;` and any tokens following
- --> tests/ui/missing_poll.rs:8:9
+error: cannot find attribute `tokio_select` in this scope
+ --> tests/ui/missing_poll.rs:6:7
   |
 6 |     #[tokio_select]
-  |     --------------- caused by the macro expansion here
-7 |     match () {
-8 |         _ | _ => invalid,
-  |         ^^^^^
+  |       ^^^^^^^^^^^^
   |
-  = note: the usage of `tokio_select!` is likely invalid in expression context
-help: you might be missing a semicolon here
+note: `tokio_select` is imported here, but it is a function-like macro
+ --> tests/ui/missing_poll.rs:3:5
   |
-6 |     #[tokio_select];
-  |                    +
+3 | use better_tokio_select::tokio_select;
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-error: expected `()`
- --> tests/ui/missing_poll.rs:8:9
+error[E0425]: cannot find value `invalid` in this scope
+ --> tests/ui/missing_poll.rs:8:18
   |
 8 |         _ | _ => invalid,
-  |         ^^^^^
+  |                  ^^^^^^^ not found in this scope

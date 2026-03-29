@@ -21,7 +21,7 @@ cargo-reedme: info-end -->
 ![msrv](https://img.shields.io/badge/msrv-nightly-blue?style=flat-square&logo=rust)
 [![github](https://img.shields.io/github/stars/nik-rev/better-tokio-select)](https://github.com/nik-rev/better-tokio-select)
 
-This crate exports the macro [`#[tokio_select]`](https://docs.rs/better_tokio_select/latest/better_tokio_select/attr.tokio_select.html), which, unlike [`tokio::select!`](https://docs.rs/tokio/latest/tokio/macro.select.html), can be formatted by `rustfmt`!
+This crate exports the macro [`#[tokio_select]`](https://docs.rs/better_tokio_select/latest/better_tokio_select/macro.tokio_select.html), which, unlike [`tokio::select!`](https://docs.rs/tokio/latest/tokio/macro.select.html), can be formatted by `rustfmt`!
 
 ```toml
 better_tokio_select = "0.1"
@@ -50,18 +50,17 @@ tokio::select! {
 `#[tokio_select]` applies to a `match` expression, which has a list of arms:
 
 ```txt
-() if let <pattern> = <async expression> (&& <precondition>)? => <handler>,
+.. if let <pattern> = <async expression> (&& <precondition>)? => <handler>,
 ```
 
 Example:
 
 ```rust
-#[tokio_select]
-match () {
-    () if let Ok(res) = reader.read(&mut buf) && can_read => {
+tokio_select!(match .. {
+    .. if let Ok(res) = reader.read(&mut buf) && can_read => {
         writer.write_all(res.bytes)
     }
-}
+})
 ```
 
 ## Examples
@@ -87,18 +86,17 @@ tokio::select! {
 `#[tokio_select]`:
 
 ```rust
-#[tokio_select]
-match () {
-    () if let Ok(n) = reader.read(&mut buf) && can_read => {
+tokio_select!(match .. {
+    .. if let Ok(n) = reader.read(&mut buf) && can_read => {
         let n = res?;
         if n == 0 { return Ok(()); }
         writer.write_all(&buf[..n]).await?;
     }
 
-    () if let _ = shutdown.recv() => {
+    .. if let _ = shutdown.recv() => {
         return Ok(())
     }
-}
+})
 ```
 
 Admittedly, the syntax is a little strange. But it’s also formattable by `rustfmt`. Trade-offs, people, trade-offs!
@@ -123,9 +121,8 @@ tokio::select! {
 `#[tokio_select]`:
 
 ```rust
-#[tokio_select(biased)]
-match () {
-    () if let Some(Message::Data { id, payload }) = rx.recv() => {
+tokio_select!(biased, match .. {
+    .. if let Some(Message::Data { id, payload }) = rx.recv() => {
         process(id, payload).await;
     }
 
@@ -133,7 +130,7 @@ match () {
         println!("no messages pending");
         tokio::time::sleep(Duration::from_millis(50)).await;
     }
-}
+})
 ```
 
 ## Global import
@@ -144,17 +141,5 @@ You can make the `tokio_select!` macro globally available in your crate, without
 #[macro_use(tokio_select)]
 extern crate better_tokio_select;
 ```
-
-## Requirements
-
-This crate requires nightly Rust, because custom attribute macros cannot currently be applied to expressions:
-
-```rust
-#![feature(proc_macro_hygiene)]
-#![feature(stmt_expr_attributes)]
-```
-
-- [Tracking issue for `proc_macro_hygiene`](https://github.com/rust-lang/rust/issues/54727)
-- [Tracking issue for `stmt_expr_attributes`](https://github.com/rust-lang/rust/issues/15701)
 
 <!-- cargo-reedme: end -->

@@ -1,5 +1,25 @@
-error: unexpected token
- --> tests/ui/extra_token_in_args.rs:5:27
+error: cannot find attribute `tokio_select` in this scope
+ --> tests/ui/extra_token_in_args.rs:5:7
   |
 5 |     #[tokio_select(biased !)]
-  |                           ^
+  |       ^^^^^^^^^^^^
+  |
+note: `tokio_select` is imported here, but it is a function-like macro
+ --> tests/ui/extra_token_in_args.rs:2:5
+  |
+2 | use better_tokio_select::tokio_select;
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+error[E0004]: non-exhaustive patterns: type `()` is non-empty
+ --> tests/ui/extra_token_in_args.rs:6:11
+  |
+6 |     match () {};
+  |           ^^
+  |
+  = note: the matched value is of type `()`
+help: ensure that all possible cases are being handled by adding a match arm with a wildcard pattern as shown
+  |
+6 ~     match () {
+7 +         _ => todo!(),
+8 ~     };
+  |
