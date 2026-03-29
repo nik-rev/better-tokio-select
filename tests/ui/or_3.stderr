@@ -1,20 +1,23 @@
-error: macro expansion ignores `;` and any tokens following
- --> tests/ui/or_3.rs:8:9
+error: cannot find attribute `tokio_select` in this scope
+ --> tests/ui/or_3.rs:6:7
   |
 6 |     #[tokio_select(biased)]
-  |     ----------------------- caused by the macro expansion here
-7 |     match () {
-8 |         _ | _ | on!(invalid) => invalid,
-  |         ^^^^^^^^^^^^^^^^^^^^
+  |       ^^^^^^^^^^^^
   |
-  = note: the usage of `tokio_select!` is likely invalid in expression context
-help: you might be missing a semicolon here
+note: `tokio_select` is imported here, but it is a function-like macro
+ --> tests/ui/or_3.rs:3:5
   |
-6 |     #[tokio_select(biased)];
-  |                            +
+3 | use better_tokio_select::tokio_select;
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-error: expected `()`
- --> tests/ui/or_3.rs:8:9
+error: cannot find macro `on` in this scope
+ --> tests/ui/or_3.rs:8:17
   |
 8 |         _ | _ | on!(invalid) => invalid,
-  |         ^^^^^^^^^^^^^^^^^^^^
+  |                 ^^
+
+error[E0425]: cannot find value `invalid` in this scope
+ --> tests/ui/or_3.rs:8:33
+  |
+8 |         _ | _ | on!(invalid) => invalid,
+  |                                 ^^^^^^^ not found in this scope
