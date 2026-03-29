@@ -48,14 +48,14 @@ tokio::select! {
 `#[tokio_select]` applies to a `match` expression, which has a list of arms:
 
 ```txt
-<pattern> | poll!(<async expression>) (if <precondition>)? => <handler>,
+<pattern> | on!(<async expression>) (if <precondition>)? => <handler>,
 ```
 
 Example:
 
 ```rust
 match () {
-    Ok(res) | poll!(reader.read(&mut buf)) if can_read => writer.write_all(res.bytes)
+    Ok(res) | on!(reader.read(&mut buf)) if can_read => writer.write_all(res.bytes)
 }
 ```
 
@@ -84,12 +84,12 @@ tokio::select! {
 ```rust
 #[tokio_select]
 match () {
-    Ok(n) | poll!(reader.read(&mut buf)) if can_read => {
+    Ok(n) | on!(reader.read(&mut buf)) if can_read => {
         if n == 0 { return Ok(()); }
         writer.write_all(&buf[..n]).await?;
     }
 
-    _ | poll!(shutdown.recv()) => return Ok(()),
+    _ | on!(shutdown.recv()) => return Ok(()),
 }
 ```
 
@@ -106,7 +106,7 @@ tokio::select! {
     }
 
     else => {
-        println!("No messages pending, taking a nap...");
+        println!("no messages pending");
         tokio::time::sleep(Duration::from_millis(50)).await;
     }
 }
@@ -117,12 +117,12 @@ tokio::select! {
 ```rust
 #[tokio_select(biased)]
 match () {
-    Some(Message::Data { id, payload }) | poll!(rx.recv()) => {
+    Some(Message::Data { id, payload }) | on!(rx.recv()) => {
         process(id, payload).await;
     }
 
     _ => {
-        println!("No messages pending, taking a nap...");
+        println!("no messages pending");
         tokio::time::sleep(Duration::from_millis(50)).await;
     }
 }
@@ -170,16 +170,16 @@ can expand to patterns, so we can abuse the fact that a match arm takes a `|`-se
 
 ```rust
 match {
-    <pattern> | poll!(<future>) (if <precondition>)? => <handler>,
+    <pattern> | on!(<future>) (if <precondition>)? => <handler>,
 }
 ```
 
-And put whatever we need inside of the `poll!` “macro”, which is really a “fake macro” that does nothing,
-the only purpose of the `poll!` wrapper is that the `#[tokio_select]` attribute extracts all tokens
+And put whatever we need inside of the `on!` “macro”, which is really a “fake macro” that does nothing,
+the only purpose of the `on!` wrapper is that the `#[tokio_select]` attribute extracts all tokens
 inside, and considers them an expression. Thus this:
 
 ```txt
-<pattern> | poll!(<future>) (if <precondition>)? => <handler>,
+<pattern> | on!(<future>) (if <precondition>)? => <handler>,
 ```
 
 Is transformed into this:

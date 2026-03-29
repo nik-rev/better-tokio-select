@@ -1,4 +1,4 @@
-error: expected format: pattern | poll!(future)
+error: expected format: pattern | on!(future)
  --> tests/ui/missing_poll.rs:8:9
   |
 8 |         _ | _ => invalid,

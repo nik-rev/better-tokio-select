@@ -1,5 +1,5 @@
-error: expected format: pattern | poll!(future)
+error: expected format: pattern | on!(future)
  --> tests/ui/or_3.rs:8:9
   |
-8 |         _ | _ | poll!(invalid) => invalid,
-  |         ^^^^^^^^^^^^^^^^^^^^^^
+8 |         _ | _ | on!(invalid) => invalid,
+  |         ^^^^^^^^^^^^^^^^^^^^

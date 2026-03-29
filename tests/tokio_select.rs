@@ -44,7 +44,7 @@ use tokio_test::assert_ready;
 async fn sync_one_lit_expr_comma() {
     let foo = #[tokio_select]
     match () {
-        foo | poll!(async { 1 }) => foo,
+        foo | on!(async { 1 }) => foo,
     };
 
     assert_eq!(foo, 1);
@@ -74,11 +74,11 @@ async fn no_branch_else_only_biased() {
 async fn nested_one() {
     let foo = #[tokio_select]
     match () {
-        foo | poll!(async { 1 }) =>
+        foo | on!(async { 1 }) =>
         {
             #[tokio_select]
             match () {
-                bar | poll!(async { foo }) => bar,
+                bar | on!(async { foo }) => bar,
             }
         }
     };
@@ -90,7 +90,7 @@ async fn nested_one() {
 async fn sync_one_lit_expr_no_comma() {
     let foo = #[tokio_select]
     match () {
-        foo | poll!(async { 1 }) => foo,
+        foo | on!(async { 1 }) => foo,
     };
 
     assert_eq!(foo, 1);
@@ -100,7 +100,7 @@ async fn sync_one_lit_expr_no_comma() {
 async fn sync_one_lit_expr_block() {
     let foo = #[tokio_select]
     match () {
-        foo | poll!(async { 1 }) => foo,
+        foo | on!(async { 1 }) => foo,
     };
 
     assert_eq!(foo, 1);
@@ -110,7 +110,7 @@ async fn sync_one_lit_expr_block() {
 async fn sync_one_await() {
     let foo = #[tokio_select]
     match () {
-        foo | poll!(one()) => foo,
+        foo | on!(one()) => foo,
     };
 
     assert_eq!(foo, 1);
@@ -122,7 +122,7 @@ async fn sync_one_ident() {
 
     let foo = #[tokio_select]
     match () {
-        foo | poll!(one) => foo,
+        foo | on!(one) => foo,
     };
 
     assert_eq!(foo, 1);
@@ -137,12 +137,12 @@ async fn sync_two() {
     let res = #[tokio_select]
     match () {
         foo
-        | poll!(async {
+        | on!(async {
             cnt.set(cnt.get() + 1);
             1
         }) => foo,
         bar
-        | poll!(async {
+        | on!(async {
             cnt.set(cnt.get() + 1);
             2
         }) => bar,
@@ -159,7 +159,7 @@ async fn drop_in_fut() {
     let res = #[tokio_select]
     match () {
         foo
-        | poll!(async {
+        | on!(async {
             let v = one().await;
             drop(s);
             v
@@ -178,10 +178,10 @@ async fn one_ready() {
 
     let v = #[tokio_select]
     match () {
-        res | poll!(rx1) => {
+        res | on!(rx1) => {
             assert_ok!(res)
         }
-        _ | poll!(rx2) => unreachable!(),
+        _ | on!(rx2) => unreachable!(),
     };
 
     assert_eq!(1, v);
@@ -213,10 +213,10 @@ async fn select_streams() {
     while rem {
         #[tokio_select]
         match () {
-            Some(x) | poll!(rx1.recv()) => {
+            Some(x) | on!(rx1.recv()) => {
                 msgs.push(x);
             }
-            Some(y) | poll!(rx2.recv()) => {
+            Some(y) | on!(rx2.recv()) => {
                 msgs.push(y);
             }
             _ => {
@@ -241,12 +241,12 @@ async fn move_uncompleted_futures() {
 
     #[tokio_select]
     match () {
-        res | poll!(&mut rx1) => {
+        res | on!(&mut rx1) => {
             assert_eq!(1, assert_ok!(res));
             assert_eq!(2, assert_ok!(rx2.await));
             ran = true;
         }
-        res | poll!(&mut rx2) => {
+        res | on!(&mut rx2) => {
             assert_eq!(2, assert_ok!(res));
             assert_eq!(1, assert_ok!(rx1.await));
             ran = true;
@@ -260,11 +260,11 @@ async fn move_uncompleted_futures() {
 async fn nested() {
     let res = #[tokio_select]
     match () {
-        x | poll!(async { 1 }) =>
+        x | on!(async { 1 }) =>
         {
             #[tokio_select]
             match () {
-                y | poll!(async { 2 }) => x + y,
+                y | on!(async { 2 }) => x + y,
             }
         }
     };
@@ -288,7 +288,7 @@ mod pointer_64_tests {
 
             #[tokio_select]
             match () {
-                _ | poll!(ready) => {}
+                _ | on!(ready) => {}
             }
         };
 
@@ -303,8 +303,8 @@ mod pointer_64_tests {
 
             #[tokio_select]
             match () {
-                _ | poll!(ready1) => {}
-                _ | poll!(ready2) => {}
+                _ | on!(ready1) => {}
+                _ | on!(ready2) => {}
             }
         };
 
@@ -320,9 +320,9 @@ mod pointer_64_tests {
 
             #[tokio_select]
             match () {
-                _ | poll!(ready1) => {}
-                _ | poll!(ready2) => {}
-                _ | poll!(ready3) => {}
+                _ | on!(ready1) => {}
+                _ | on!(ready2) => {}
+                _ | on!(ready3) => {}
             }
         };
 
@@ -336,8 +336,8 @@ async fn mutable_borrowing_future_with_same_borrow_in_block() {
 
     #[tokio_select]
     match () {
-        _ | poll!(require_mutable(&mut value)) => {}
-        _ | poll!(async_noop()) => {
+        _ | on!(require_mutable(&mut value)) => {}
+        _ | on!(async_noop()) => {
             value += 5;
         }
     }
@@ -351,8 +351,8 @@ async fn mutable_borrowing_future_with_same_borrow_in_block_and_else() {
 
     #[tokio_select]
     match () {
-        _ | poll!(require_mutable(&mut value)) => {}
-        _ | poll!(async_noop()) => {
+        _ | on!(require_mutable(&mut value)) => {}
+        _ | on!(async_noop()) => {
             value += 5;
         }
         _ => {
@@ -380,8 +380,8 @@ async fn future_panics_after_poll() {
     let mut f = task::spawn(async {
         #[tokio_select]
         match () {
-            Some(_) | poll!(f) => unreachable!(),
-            ret | poll!(rx) => ret.unwrap(),
+            Some(_) | on!(f) => unreachable!(),
+            ret | on!(rx) => ret.unwrap(),
         }
     });
 
@@ -404,8 +404,8 @@ async fn disable_with_if() {
     let mut f = task::spawn(async {
         #[tokio_select]
         match () {
-            _ | poll!(f) if false => unreachable!(),
-            _ | poll!(rx) => (),
+            _ | on!(f) if false => unreachable!(),
+            _ | on!(rx) => (),
         }
     });
 
@@ -431,8 +431,8 @@ async fn join_with_select() {
         while a.is_none() || b.is_none() {
             #[tokio_select]
             match () {
-                v1 | poll!(&mut rx1) if a.is_none() => a = Some(assert_ok!(v1)),
-                v2 | poll!(&mut rx2) if b.is_none() => b = Some(assert_ok!(v2)),
+                v1 | on!(&mut rx1) if a.is_none() => a = Some(assert_ok!(v1)),
+                v2 | on!(&mut rx2) if b.is_none() => b = Some(assert_ok!(v2)),
             }
         }
 
@@ -460,10 +460,10 @@ async fn use_future_in_if_condition() {
 
     #[tokio_select]
     match () {
-        _ | poll!(time::sleep(Duration::from_millis(10))) if false => {
+        _ | on!(time::sleep(Duration::from_millis(10))) if false => {
             panic!("if condition ignored")
         }
-        _ | poll!(async { 1u32 }) => {}
+        _ | on!(async { 1u32 }) => {}
     }
 }
 
@@ -474,10 +474,10 @@ async fn use_future_in_if_condition_biased() {
 
     #[tokio_select(biased)]
     match () {
-        _ | poll!(time::sleep(Duration::from_millis(10))) if false => {
+        _ | on!(time::sleep(Duration::from_millis(10))) if false => {
             panic!("if condition ignored")
         }
-        _ | poll!(async { 1u32 }) => {}
+        _ | on!(async { 1u32 }) => {}
     }
 }
 
@@ -485,70 +485,70 @@ async fn use_future_in_if_condition_biased() {
 async fn many_branches() {
     let num = #[tokio_select]
     match () {
-        x | poll!(async { 1 }) => x,
-        x | poll!(async { 1 }) => x,
-        x | poll!(async { 1 }) => x,
-        x | poll!(async { 1 }) => x,
-        x | poll!(async { 1 }) => x,
-        x | poll!(async { 1 }) => x,
-        x | poll!(async { 1 }) => x,
-        x | poll!(async { 1 }) => x,
-        x | poll!(async { 1 }) => x,
-        x | poll!(async { 1 }) => x,
-        x | poll!(async { 1 }) => x,
-        x | poll!(async { 1 }) => x,
-        x | poll!(async { 1 }) => x,
-        x | poll!(async { 1 }) => x,
-        x | poll!(async { 1 }) => x,
-        x | poll!(async { 1 }) => x,
-        x | poll!(async { 1 }) => x,
-        x | poll!(async { 1 }) => x,
-        x | poll!(async { 1 }) => x,
-        x | poll!(async { 1 }) => x,
-        x | poll!(async { 1 }) => x,
-        x | poll!(async { 1 }) => x,
-        x | poll!(async { 1 }) => x,
-        x | poll!(async { 1 }) => x,
-        x | poll!(async { 1 }) => x,
-        x | poll!(async { 1 }) => x,
-        x | poll!(async { 1 }) => x,
-        x | poll!(async { 1 }) => x,
-        x | poll!(async { 1 }) => x,
-        x | poll!(async { 1 }) => x,
-        x | poll!(async { 1 }) => x,
-        x | poll!(async { 1 }) => x,
-        x | poll!(async { 1 }) => x,
-        x | poll!(async { 1 }) => x,
-        x | poll!(async { 1 }) => x,
-        x | poll!(async { 1 }) => x,
-        x | poll!(async { 1 }) => x,
-        x | poll!(async { 1 }) => x,
-        x | poll!(async { 1 }) => x,
-        x | poll!(async { 1 }) => x,
-        x | poll!(async { 1 }) => x,
-        x | poll!(async { 1 }) => x,
-        x | poll!(async { 1 }) => x,
-        x | poll!(async { 1 }) => x,
-        x | poll!(async { 1 }) => x,
-        x | poll!(async { 1 }) => x,
-        x | poll!(async { 1 }) => x,
-        x | poll!(async { 1 }) => x,
-        x | poll!(async { 1 }) => x,
-        x | poll!(async { 1 }) => x,
-        x | poll!(async { 1 }) => x,
-        x | poll!(async { 1 }) => x,
-        x | poll!(async { 1 }) => x,
-        x | poll!(async { 1 }) => x,
-        x | poll!(async { 1 }) => x,
-        x | poll!(async { 1 }) => x,
-        x | poll!(async { 1 }) => x,
-        x | poll!(async { 1 }) => x,
-        x | poll!(async { 1 }) => x,
-        x | poll!(async { 1 }) => x,
-        x | poll!(async { 1 }) => x,
-        x | poll!(async { 1 }) => x,
-        x | poll!(async { 1 }) => x,
-        x | poll!(async { 1 }) => x,
+        x | on!(async { 1 }) => x,
+        x | on!(async { 1 }) => x,
+        x | on!(async { 1 }) => x,
+        x | on!(async { 1 }) => x,
+        x | on!(async { 1 }) => x,
+        x | on!(async { 1 }) => x,
+        x | on!(async { 1 }) => x,
+        x | on!(async { 1 }) => x,
+        x | on!(async { 1 }) => x,
+        x | on!(async { 1 }) => x,
+        x | on!(async { 1 }) => x,
+        x | on!(async { 1 }) => x,
+        x | on!(async { 1 }) => x,
+        x | on!(async { 1 }) => x,
+        x | on!(async { 1 }) => x,
+        x | on!(async { 1 }) => x,
+        x | on!(async { 1 }) => x,
+        x | on!(async { 1 }) => x,
+        x | on!(async { 1 }) => x,
+        x | on!(async { 1 }) => x,
+        x | on!(async { 1 }) => x,
+        x | on!(async { 1 }) => x,
+        x | on!(async { 1 }) => x,
+        x | on!(async { 1 }) => x,
+        x | on!(async { 1 }) => x,
+        x | on!(async { 1 }) => x,
+        x | on!(async { 1 }) => x,
+        x | on!(async { 1 }) => x,
+        x | on!(async { 1 }) => x,
+        x | on!(async { 1 }) => x,
+        x | on!(async { 1 }) => x,
+        x | on!(async { 1 }) => x,
+        x | on!(async { 1 }) => x,
+        x | on!(async { 1 }) => x,
+        x | on!(async { 1 }) => x,
+        x | on!(async { 1 }) => x,
+        x | on!(async { 1 }) => x,
+        x | on!(async { 1 }) => x,
+        x | on!(async { 1 }) => x,
+        x | on!(async { 1 }) => x,
+        x | on!(async { 1 }) => x,
+        x | on!(async { 1 }) => x,
+        x | on!(async { 1 }) => x,
+        x | on!(async { 1 }) => x,
+        x | on!(async { 1 }) => x,
+        x | on!(async { 1 }) => x,
+        x | on!(async { 1 }) => x,
+        x | on!(async { 1 }) => x,
+        x | on!(async { 1 }) => x,
+        x | on!(async { 1 }) => x,
+        x | on!(async { 1 }) => x,
+        x | on!(async { 1 }) => x,
+        x | on!(async { 1 }) => x,
+        x | on!(async { 1 }) => x,
+        x | on!(async { 1 }) => x,
+        x | on!(async { 1 }) => x,
+        x | on!(async { 1 }) => x,
+        x | on!(async { 1 }) => x,
+        x | on!(async { 1 }) => x,
+        x | on!(async { 1 }) => x,
+        x | on!(async { 1 }) => x,
+        x | on!(async { 1 }) => x,
+        x | on!(async { 1 }) => x,
+        x | on!(async { 1 }) => x,
     };
 
     assert_eq!(1, num);
@@ -558,8 +558,8 @@ async fn many_branches() {
 async fn never_branch_no_warnings() {
     let t = #[tokio_select]
     match () {
-        _ | poll!(async_never()) => 0,
-        one_async_ready | poll!(one()) => one_async_ready,
+        _ | on!(async_never()) => 0,
+        one_async_ready | on!(one()) => one_async_ready,
     };
     assert_eq!(t, 1);
 }
@@ -571,7 +571,7 @@ async fn mut_on_left_hand_side() {
         tokio::pin!(ok);
         #[tokio_select]
         match () {
-            mut a | poll!(&mut ok) => {
+            mut a | on!(&mut ok) => {
                 a += 1;
                 a
             }
@@ -592,11 +592,11 @@ async fn biased_one_not_ready() {
 
     let v = #[tokio_select(biased)]
     match () {
-        _ | poll!(rx1) => unreachable!(),
-        res | poll!(rx2) => {
+        _ | on!(rx1) => unreachable!(),
+        res | on!(rx2) => {
             assert_ok!(res)
         }
-        _ | poll!(rx3) => {
+        _ | on!(rx3) => {
             panic!("This branch should never be activated because `rx2` should be polled before `rx3` due to `biased`.")
         }
     };
@@ -619,15 +619,15 @@ async fn biased_eventually_ready() {
     loop {
         #[tokio_select(biased)]
         match () {
-            _ | poll!(&mut two) if count < 2 => {
+            _ | on!(&mut two) if count < 2 => {
                 count += 1;
                 assert_eq!(count, 2);
             }
-            _ | poll!(&mut three) if count < 3 => {
+            _ | on!(&mut three) if count < 3 => {
                 count += 1;
                 assert_eq!(count, 3);
             }
-            _ | poll!(&mut one) if count < 1 => {
+            _ | on!(&mut one) if count < 1 => {
                 count += 1;
                 assert_eq!(count, 1);
             }
@@ -642,7 +642,7 @@ async fn biased_eventually_ready() {
 pub async fn default_numeric_fallback() {
     #[tokio_select]
     match () {
-        _ | poll!(async {}) => (),
+        _ | on!(async {}) => (),
         _ => (),
     }
 }
@@ -651,7 +651,7 @@ pub async fn default_numeric_fallback() {
 async fn mut_ref_patterns() {
     #[tokio_select]
     match () {
-        Some(mut foo) | poll!(async { Some("1".to_string()) }) => {
+        Some(mut foo) | on!(async { Some("1".to_string()) }) => {
             assert_eq!(foo, "1");
             foo = "2".to_string();
             assert_eq!(foo, "2");
@@ -660,14 +660,14 @@ async fn mut_ref_patterns() {
 
     #[tokio_select]
     match () {
-        Some(ref foo) | poll!(async { Some("1".to_string()) }) => {
+        Some(ref foo) | on!(async { Some("1".to_string()) }) => {
             assert_eq!(*foo, "1");
         }
     }
 
     #[tokio_select]
     match () {
-        Some(ref mut foo) | poll!(async { Some("1".to_string()) }) => {
+        Some(ref mut foo) | on!(async { Some("1".to_string()) }) => {
             assert_eq!(*foo, "1");
             *foo = "2".to_string();
             assert_eq!(*foo, "2");
@@ -689,7 +689,7 @@ async fn select_into_future() {
 
     #[tokio_select]
     match () {
-        () | poll!(NotAFuture) => {}
+        () | on!(NotAFuture) => {}
     }
 }
 
@@ -697,7 +697,7 @@ async fn select_into_future() {
 async fn temporary_lifetime_extension() {
     #[tokio_select]
     match () {
-        () | poll!(&mut std::future::ready(())) => {}
+        () | on!(&mut std::future::ready(())) => {}
     }
 }
 
@@ -709,8 +709,8 @@ async fn select_is_budget_aware() {
         Box::pin(async move {
             #[tokio_select(biased)]
             match () {
-                () | poll!(tokio::task::coop::consume_budget()) => {}
-                () | poll!(std::future::ready(())) => {}
+                () | on!(tokio::task::coop::consume_budget()) => {}
+                () | on!(std::future::ready(())) => {}
             }
         })
     };

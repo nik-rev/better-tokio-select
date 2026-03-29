@@ -33,7 +33,7 @@
 //! `#[tokio_select]` applies to a `match` expression, which has a list of arms:
 //!
 //! ```txt
-//! <pattern> | poll!(<async expression>) (if <precondition>)? => <handler>,
+//! <pattern> | on!(<async expression>) (if <precondition>)? => <handler>,
 //! ```
 //!
 //! Example:
@@ -41,7 +41,7 @@
 //! ```
 //! # /*
 //! match () {
-//!     Ok(res) | poll!(reader.read(&mut buf)) if can_read => writer.write_all(res.bytes)
+//!     Ok(res) | on!(reader.read(&mut buf)) if can_read => writer.write_all(res.bytes)
 //! }
 //! # */
 //! ```
@@ -74,12 +74,12 @@
 //! # /*
 //! #[tokio_select]
 //! match () {
-//!     Ok(n) | poll!(reader.read(&mut buf)) if can_read => {
+//!     Ok(n) | on!(reader.read(&mut buf)) if can_read => {
 //!         if n == 0 { return Ok(()); }
 //!         writer.write_all(&buf[..n]).await?;
 //!     }
 //!
-//!     _ | poll!(shutdown.recv()) => return Ok(()),
+//!     _ | on!(shutdown.recv()) => return Ok(()),
 //! }
 //! # */
 //! ```
@@ -111,7 +111,7 @@
 //! # /*
 //! #[tokio_select(biased)]
 //! match () {
-//!     Some(Message::Data { id, payload }) | poll!(rx.recv()) => {
+//!     Some(Message::Data { id, payload }) | on!(rx.recv()) => {
 //!         process(id, payload).await;
 //!     }
 //!
@@ -168,17 +168,17 @@
 //! ```
 //! # /*
 //! match {
-//!     <pattern> | poll!(<future>) (if <precondition>)? => <handler>,
+//!     <pattern> | on!(<future>) (if <precondition>)? => <handler>,
 //! }
 //! # */
 //! ```
 //!
-//! And put whatever we need inside of the `poll!` "macro", which is really a "fake macro" that does nothing,
-//! the only purpose of the `poll!` wrapper is that the `#[tokio_select]` attribute extracts all tokens
+//! And put whatever we need inside of the `on!` "macro", which is really a "fake macro" that does nothing,
+//! the only purpose of the `on!` wrapper is that the `#[tokio_select]` attribute extracts all tokens
 //! inside, and considers them an expression. Thus this:
 //!
 //! ```txt
-//! <pattern> | poll!(<future>) (if <precondition>)? => <handler>,
+//! <pattern> | on!(<future>) (if <precondition>)? => <handler>,
 //! ```
 //!
 //! Is transformed into this:
@@ -224,7 +224,7 @@ pub fn tokio_select(args: TokenStream, input: TokenStream) -> TokenStream {
 
                 match &or.cases[1] {
                     Pat::Macro(macr)
-                        if macr.mac.path.is_ident("poll")
+                        if macr.mac.path.is_ident("on")
                             && matches!(macr.mac.delimiter, MacroDelimiter::Paren(_)) =>
                     {
                         let fut = &macr.mac.tokens;
@@ -236,7 +236,7 @@ pub fn tokio_select(args: TokenStream, input: TokenStream) -> TokenStream {
                     _ => {
                         return syn::Error::new_spanned(
                             pat,
-                            "expected format: pattern | poll!(future)",
+                            "expected format: pattern | on!(future)",
                         )
                         .to_compile_error()
                         .into();
@@ -249,7 +249,7 @@ pub fn tokio_select(args: TokenStream, input: TokenStream) -> TokenStream {
                 });
             }
             _ => {
-                return syn::Error::new_spanned(pat, "expected format: pattern | poll!(future)")
+                return syn::Error::new_spanned(pat, "expected format: pattern | on!(future)")
                     .to_compile_error()
                     .into();
             }
