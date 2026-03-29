@@ -16,8 +16,10 @@
 //!
 //! `tokio::select!` takes a list of branches:
 //!
-//! ```txt
+//! ```
+//! # /*
 //! <pattern> = <async expression> (, if <precondition>)? => <handler>,
+//! # */
 //! ```
 //!
 //! Example:
@@ -34,8 +36,10 @@
 //!
 //! `tokio_select!` takes a `match ..` expression as an argument, which has a list of arms:
 //!
-//! ```txt
+//! ```
+//! # /*
 //! .. if let <pattern> = <async expression> (&& <precondition>)? => <handler>,
+//! # */
 //! ```
 //!
 //! Example:
