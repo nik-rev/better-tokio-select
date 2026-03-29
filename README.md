@@ -146,6 +146,9 @@ This crate requires nightly Rust, because custom attribute macros cannot current
 #![feature(stmt_expr_attributes)]
 ```
 
+- [Tracking issue for `proc_macro_hygiene`](https://github.com/rust-lang/rust/issues/54727)
+- [Tracking issue for `stmt_expr_attributes`](https://github.com/rust-lang/rust/issues/15701)
+
 ## Design notes
 
 This section explains *why* that syntax is used.
