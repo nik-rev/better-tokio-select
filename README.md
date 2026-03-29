@@ -24,7 +24,7 @@ cargo-reedme: info-end -->
 This crate exports the macro [`tokio_select!`](https://docs.rs/better_tokio_select/latest/better_tokio_select/macro.tokio_select.html), which, unlike [`tokio::select!`](https://docs.rs/tokio/latest/tokio/macro.select.html), can be formatted by `rustfmt`!
 
 ```toml
-better_tokio_select = "0.1"
+better_tokio_select = "0.2"
 ```
 
 ## Syntax
