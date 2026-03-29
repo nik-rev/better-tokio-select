@@ -50,7 +50,7 @@ tokio::select! {
 `#[tokio_select]` applies to a `match` expression, which has a list of arms:
 
 ```txt
-<pattern> | on!(<async expression>) (if <precondition>)? => <handler>,
+() if let <pattern> = <async expression> (&& <precondition>)? => <handler>,
 ```
 
 Example:
@@ -58,7 +58,7 @@ Example:
 ```rust
 #[tokio_select]
 match () {
-    Ok(res) | on!(reader.read(&mut buf)) if can_read => {
+    () if let Ok(res) = reader.read(&mut buf) && can_read => {
         writer.write_all(res.bytes)
     }
 }
@@ -89,13 +89,13 @@ tokio::select! {
 ```rust
 #[tokio_select]
 match () {
-    Ok(n) | on!(reader.read(&mut buf)) if can_read => {
+    () if let Ok(n) = reader.read(&mut buf) && can_read => {
         let n = res?;
         if n == 0 { return Ok(()); }
         writer.write_all(&buf[..n]).await?;
     }
 
-    _ | on!(shutdown.recv()) => {
+    () if let _ = shutdown.recv() => {
         return Ok(())
     }
 }
@@ -125,7 +125,7 @@ tokio::select! {
 ```rust
 #[tokio_select(biased)]
 match () {
-    Some(Message::Data { id, payload }) | on!(rx.recv()) => {
+    () if let Some(Message::Data { id, payload }) = rx.recv() => {
         process(id, payload).await;
     }
 
@@ -156,59 +156,5 @@ This crate requires nightly Rust, because custom attribute macros cannot current
 
 - [Tracking issue for `proc_macro_hygiene`](https://github.com/rust-lang/rust/issues/54727)
 - [Tracking issue for `stmt_expr_attributes`](https://github.com/rust-lang/rust/issues/15701)
-
-## Design notes
-
-This section explains *why* that syntax is used.
-
-A single branch of the `tokio::select!` macro requires:
-
-- a pattern
-- expression (the future)
-- optional expression (the `if` condition)
-- expression (handler)
-
-Using a custom DSL, such as `tokio::select!`, it’s easy to come up with an arbitrary syntax that looks okay.
-
-But if we want `rustfmt` to work, then the expression must parse as valid Rust syntax. A `match` expression is *almost* perfect for this:
-
-```rust
-match () {
-    <pattern> (if <precondition>)? => <handler>,
-}
-```
-
-That covers:
-
-- ✅ a pattern
-- ❌ expression (the future)
-- ✅ optional expression (the `if` condition)
-- ✅ expression (handler)
-
-We need to figure out how we can stuff an arbitrary expression into a match arm. Thankfully, macros
-can expand to patterns, so we can abuse the fact that a match arm takes a `|`-separated list of “patterns”:
-
-```rust
-match () {
-    <pattern> | on!(<future>) (if <precondition>)? => <handler>,
-}
-```
-
-And put whatever we need inside of the `on!` “macro”, which is really a “fake macro” that does nothing,
-the only purpose of the `on!` wrapper is that the `#[tokio_select]` attribute extracts all tokens
-inside, and considers them an expression. Thus this:
-
-```txt
-<pattern> | on!(<future>) (if <precondition>)? => <handler>,
-```
-
-Is transformed into this:
-
-```txt
-<pattern> = <future> (e if <precondition>)? => <handler>,
-```
-
-The “scrutinee” `()` in `match () {` is also meaningless, as it is only used to make the expression
-parseable as valid Rust.
 
 <!-- cargo-reedme: end -->

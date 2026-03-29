@@ -1,4 +1,19 @@
-error: expected format: pattern | on!(future)
+error: macro expansion ignores `;` and any tokens following
+ --> tests/ui/or_3.rs:8:9
+  |
+6 |     #[tokio_select(biased)]
+  |     ----------------------- caused by the macro expansion here
+7 |     match () {
+8 |         _ | _ | on!(invalid) => invalid,
+  |         ^^^^^^^^^^^^^^^^^^^^
+  |
+  = note: the usage of `tokio_select!` is likely invalid in expression context
+help: you might be missing a semicolon here
+  |
+6 |     #[tokio_select(biased)];
+  |                            +
+
+error: expected `()`
  --> tests/ui/or_3.rs:8:9
   |
 8 |         _ | _ | on!(invalid) => invalid,
